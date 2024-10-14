@@ -5,7 +5,7 @@ from data_base_class import DataBase
 
 
 db = DataBase()
-
+hash = hashlib.new("SHA256")
 
 class User():
     def __init__(self, name,username, password, mail, image, access_key = None ,manager_access = False):
@@ -17,9 +17,9 @@ class User():
         self.manager_access = manager_access
         self.access_key = access_key
         self.create_user_hash()
-    """
-    HACER QUE GUARDE LA HASH EN UN ARCHIVO PARA DESP BUSCARLA
-    """
+        self.check_pw()
+        
+
     def get_username(self):
         return self.username
     
@@ -28,7 +28,7 @@ class User():
         CUANDO SE CREA EL USER, CREA UN HASH DE TODO LO NECESARIO Y LO GUARDA
         EN LA BASE DE DATOS DIRECTO.
         """
-        hash = hashlib.new("SHA256")
+        
         hash.update(self.password.encode())
         hash_pword = (hash.hexdigest())
         if self.manager_access is False:
@@ -45,8 +45,15 @@ class User():
 
         
   #HACER PROXIMO
-    def check_pw(self): #busca el hash, acorde a la contra, guardado
-        pass
+    def check_pw(self):#busca el hash, acorde a la contra, guardado
+        if self.manager_access:
+            table = "MANAGER"
+            user_info = db.search_username(table, self.username)
+        else:
+            table = "CLIENT"
+            user_info = db.search_username(table, self.username)
+        print(user_info)
+        
     def check_access_key(self):
         pass
     
@@ -73,9 +80,6 @@ class MarketManager(User):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #             Testing             #
 
-migue = Client("jorge", 99999, "21213131", "2132143425145", "juan@mail.com","imagen.png")
-manafer = MarketManager("2312313123","MANAGER_USER", "PASSWORD", "JSJSJSJJS@KDMNKDNK", "ddddd") 
+migue = Client("MANOLO", 99999, "necinwicwicn", "288282828282", "juan@mail.com","imagen.png")
+manafer = MarketManager("WOWOWOOWW","YEYYYEYEYEY", "hhhh", "JSJSJSJJS@KDMNKDNK", "ddddd") 
 #SOY UNA BESTIA
-
-
-ddddd= "SOY UNA BESTIAAAAAAAAAAAA"

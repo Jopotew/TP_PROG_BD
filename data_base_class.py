@@ -13,7 +13,11 @@ class DataBase():
         return row_to_search.data
     
     def search_by_product(self, table, product):  # BUSCA UN PRODUCTO
-        product_to_search = self.database.table(table).select("id, producto, stock").eq("producto", product).execute()
+        product_to_search = self.database.table(table).select("ID, producto, stock").eq("producto", product).execute()
+        return product_to_search.data
+    
+    def search_username(self, table, username):  #Busca contrasenias
+        product_to_search = self.database.table(table).select("ID, USERNAME, PASSWORD").eq("USERNAME", username).execute()
         return product_to_search.data
 
     def insert_product(self, table, data):  # INSERTA UN PRODUCTO
