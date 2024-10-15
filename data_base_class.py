@@ -36,8 +36,59 @@ class DataBase():
         response = self.database.table(table).delete().eq('id', product_id).execute()
         return response.data
                     
+                        
+    def check_and_create_order(self, username):
+        
+        client_info = self.search_username("CLIENT", username)
+        payed = 1
+        not_payed = 2
+        if not client_info:
+            print(f"Cliente con username '{username}' no encontrado.")
+            return None
+        
+        client_id = client_info[0]['ID']
+        
+        client_order = self.database.table("ORDER").select("*").eq("ID_CLIENT", client_id).execute()
+        
+        #FALTA HACER QUE BUSQUE SI HAY UNA IMPAGA.
+
+        if client_order.data:
+            
+            unpayed_status = self.database.table("ORDER").select("*").eq("ID_CLIENT", client_id).eq("ID_STATUS", not_payed).execute()
+            
+            payed_status =  self.database.table("ORDER").select("*").eq("ID_CLIENT", client_id).eq("ID_STATUS", payed).execute()
+            
+            if payed_status.data[0]["ID_STATUS"] == 1:
+                print(username,"tiene una orden paga, se creara una nueva. ")
+                new_order_data = {
+                "ID_CLIENT": client_id,
+                "ID_STATUS": 2,
+                "TOTAL_ORDER": 0,
+                 }
+                new_order = self.insert_product("ORDER", new_order_data)
+                print(f"Se ha creado una nueva orden para el cliente '{username}'.")
+                return new_order
+            
+            if unpayed_status.data[0]["ID_STATUS"] == 2:
+                existing_order = self.database.table("ORDER").select("*").eq("ID_CLIENT", client_id).eq("ID_STATUS", 2).execute()
+                if existing_order.data:
+                    print(existing_order)
+                    print(f"Orden existente encontrada para el cliente '{username}'.")
+                    return existing_order.data[0]  
+            
+        else:       
+            new_order_data = {
+                "ID_CLIENT": client_id,
+                "ID_STATUS": 2,
+                "TOTAL_ORDER": 0,
+            }
+            
+            new_order = self.insert_product("ORDER", new_order_data)
+            print(f"Se ha creado una nueva orden para el cliente '{username}'.")
+            return new_order
 
 
 
+db = DataBase()
 
-       
+db.check_and_create_order("UserMigue")

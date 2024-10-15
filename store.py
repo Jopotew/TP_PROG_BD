@@ -1,4 +1,8 @@
 from abc import ABC, abstractmethod
+from data_base_class import DataBase
+
+db = DataBase()
+
 
 """ - Contiene las clases relacionadas con el supermercado, el carrito y los ítems - """
 class Item:
@@ -91,6 +95,9 @@ class ShoppingCartSinDescuento(ShoppingCartAbstracto):
     def addItem(self, item):
         self.cart.append(item)
         print(f"El cliente {self.client.name} añade el producto {item} al carrito")
+        db.check_and_create_order(self.client.username, )
+        
+        
     #AGREGAR A ORDEN DE COMPRA
 
     def removeItem(self, item):
