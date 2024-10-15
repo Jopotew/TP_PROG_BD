@@ -62,6 +62,7 @@ class ShoppingCartConDescuento(ShoppingCartAbstracto):
     def addItem(self, item):
         self.cart.append(item)
         print(f"El cliente {self.client.name} añade el producto {item} al carrito")
+        
 
     def removeItem(self, item):
         self.cart.remove(item)
@@ -90,11 +91,13 @@ class ShoppingCartSinDescuento(ShoppingCartAbstracto):
     def addItem(self, item):
         self.cart.append(item)
         print(f"El cliente {self.client.name} añade el producto {item} al carrito")
+    #AGREGAR A ORDEN DE COMPRA
 
     def removeItem(self, item):
         self.cart.remove(item)
         print(f"El cliente {self.client.name} elimina el producto {item} del carrito")
-        
+    #ELIMINAR DE ORDEN
+            
     def getCart(self):
         return self.cart
     
