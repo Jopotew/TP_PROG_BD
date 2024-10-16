@@ -7,8 +7,12 @@ class DataBase():
         self.url = "https://rdflukyossbeuphyeufp.supabase.co"
         self.database: Client = create_client(self.url, self.key)
 
-    def search_by_row_key(self, table, row):  # BUSCA POR FILA
+    def search_by_row(self, table, row):  # BUSCA POR FILA
         row_to_search = self.database.table(table).select(row).execute()
+        return row_to_search.data
+    
+    def search_by_row_and_key(self, table, row, column, key_to_search):  # BUSCA POR FILA
+        row_to_search = self.database.table(table).select(row).eq(column, key_to_search).execute()
         return row_to_search.data
     
     def search_by_product(self, table, product):  # BUSCA UN PRODUCTO
@@ -40,55 +44,58 @@ class DataBase():
     def check_and_create_order(self, username):
         
         client_info = self.search_username("CLIENT", username)
-        payed = 1
-        not_payed = 2
         if not client_info:
             print(f"Cliente con username '{username}' no encontrado.")
             return None
         
         client_id = client_info[0]['ID']
+        client_order = self.search_by_row_and_key("ORDER", "*", "ID_CLIENT", client_id)
         
-        client_order = self.database.table("ORDER").select("*").eq("ID_CLIENT", client_id).execute()
-        
-        #FALTA HACER QUE BUSQUE SI HAY UNA IMPAGA.
+        if client_order:
+            for status in client_order:
+                if status["ID_STATUS"] == 1: 
+                    print("EXISTE ORDEN PAGA")
+                    for unpaid_status in client_order:
+                        print("BUSCANDO ORDEN IMPAGA")
+                        if unpaid_status["ID_STATUS"] == 2:
+                            print("hay una orden paga, pero tiene una impaga. Utilizando la impaga")
+                            unpaid_order = self.return_unpaid_order(client_id, username)
+                            return unpaid_order
+                    print("NO EXISTE ORDEN IMPAGA")
+                    new_order = self.create_new_order(client_id, username)   
+                    return new_order   
+                            
+                else:   
+                    print("ORden impaga")
+                    unpaid_order = self.return_unpaid_order(client_id, username)
+                    return unpaid_order
 
-        if client_order.data:
-            
-            unpayed_status = self.database.table("ORDER").select("*").eq("ID_CLIENT", client_id).eq("ID_STATUS", not_payed).execute()
-            
-            payed_status =  self.database.table("ORDER").select("*").eq("ID_CLIENT", client_id).eq("ID_STATUS", payed).execute()
-            
-            if payed_status.data[0]["ID_STATUS"] == 1:
-                print(username,"tiene una orden paga, se creara una nueva. ")
-                new_order_data = {
-                "ID_CLIENT": client_id,
-                "ID_STATUS": 2,
-                "TOTAL_ORDER": 0,
-                 }
-                new_order = self.insert_product("ORDER", new_order_data)
-                print(f"Se ha creado una nueva orden para el cliente '{username}'.")
-                return new_order
-            
-            if unpayed_status.data[0]["ID_STATUS"] == 2:
-                existing_order = self.database.table("ORDER").select("*").eq("ID_CLIENT", client_id).eq("ID_STATUS", 2).execute()
-                if existing_order.data:
-                    print(existing_order)
-                    print(f"Orden existente encontrada para el cliente '{username}'.")
-                    return existing_order.data[0]  
+            print("FIN DEL FOR")
             
         else:       
-            new_order_data = {
-                "ID_CLIENT": client_id,
-                "ID_STATUS": 2,
-                "TOTAL_ORDER": 0,
+            print("NO HAY ORDEN")
+            new_order = self.create_new_order(client_id, username)   
+            return new_order   
+    
+    def return_unpaid_order(self, client_id, username):
+        existing_order = self.database.table("ORDER").select("*").eq("ID_CLIENT", client_id).eq("ID_STATUS", 2).execute()
+        if existing_order.data:
+            print(f"Orden existente encontrada para el cliente '{username}'.")
+            print("RETURNS UNPAID ORDER")
+            return existing_order.data[0] 
+        
+    def create_new_order(self, client_id, username):
+        new_order_data = {
+        "ID_CLIENT": client_id,
+        "ID_STATUS": 2,
+        "TOTAL_ORDER": 0,
             }
-            
-            new_order = self.insert_product("ORDER", new_order_data)
-            print(f"Se ha creado una nueva orden para el cliente '{username}'.")
-            return new_order
+        new_order = self.insert_product("ORDER", new_order_data)
+        print(f"Se ha creado una nueva orden para el cliente '{username}'.")
+        print("CREATES NEW ORDER")
+        return new_order
 
 
 
 db = DataBase()
 
-db.check_and_create_order("UserMigue")
