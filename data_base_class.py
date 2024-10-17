@@ -70,8 +70,6 @@ class DataBase():
                     unpaid_order = self.return_unpaid_order(client_id, username)
                     return unpaid_order
 
-            print("FIN DEL FOR")
-            
         else:       
             print("NO HAY ORDEN")
             new_order = self.create_new_order(client_id, username)   
@@ -95,7 +93,49 @@ class DataBase():
         print("CREATES NEW ORDER")
         return new_order
 
+#Queda hacer que se ligue a una orderLine
+    def new_order_line(self, order, product):
+        order_id = order[0]["ID"]
+        product_table= self.search_by_row_and_key("PRODUCT","*","NAME",product)
+        product_id = product_table[0]["ID"]
+        order_line_table = self.search_by_row_key("ORDER_LINE","*","ID_PRODUCT", product_id)
+
+        for order in order_line_table:
+            quantity = order["QUANTITY"]
+            if product_id == order["ID_PRODUCT"] & order_id == order["ID_ORDER"]:
+                print("ID PRODUCTO Y ID ORDER ENCONTRADOS DENTRO DEL ORDERLINE")
+                print("SUMANDO 1 A LA CANTIDAD")
+                self.create_order_line(product_id, order_id, quantity)
+            else : 
+                print("ID PRODUCTO NO EXISTE DENTRO DEL ORDERLINE")
+                print("CREANDO  NUEVO ORDERLINE CON PRODUCTO")
+                self.create_order_line(product_id, order_id, quantity)
+        print("No hay ordenes dentro de la orderline, creando una")
+        quantity = order_line_table[0]["QUANTITY"]
+        self.create_order_line(product_id, order_id, quantity)
+
+
+    def create_order_line(self, product_id, order_id, quantity):
+        new_order_line_data : dict = {
+            "ID_PRODUCT": product_id,
+            "ID_ORDER" : order_id,
+            "QUANTITY": quantity + 1,
+            }
+        new_line = self.insert_product("ORDER_LINE", new_order_line_data)
+        return new_line
+        
+
+
+        
+
 
 
 db = DataBase()
 
+
+
+def test():
+    order = db.check_and_create_order("UserMigue")
+    db.new_order_line("Queso", order)
+
+test()
