@@ -33,11 +33,11 @@ class DataBase():
         PUEDE TAMBIEN RECIBIR OTRA COSA. EJ: DATA_A_CAMBIAR = {"NOMBRE_PRODUCTO" : "MANZANA"}
         LA PRIMERA PARTE DEL DICT REFIERE A LA SECCION DE LA TABLA QUE QUERES MODIFICAR
         """
-        response = self.database.table(table).update(data).eq('id', product_id).execute()
+        response = self.database.table(table).update(data).eq('ID', product_id).execute()
         return response.data
 
     def delete_product(self, table, product_id):  # ELIMINA UN PRODUCTO
-        response = self.database.table(table).delete().eq('id', product_id).execute()
+        response = self.database.table(table).delete().eq('ID', product_id).execute()
         return response.data
                     
                         
@@ -94,25 +94,33 @@ class DataBase():
         return new_order
 
 #Queda hacer que se ligue a una orderLine
-    def new_order_line(self, order, product):
-        order_id = order[0]["ID"]
+    def new_order_line(self, order, product, ):
+        
+        order_id = order["ID"]
         product_table= self.search_by_row_and_key("PRODUCT","*","NAME",product)
         product_id = product_table[0]["ID"]
-        order_line_table = self.search_by_row_key("ORDER_LINE","*","ID_PRODUCT", product_id)
+        
+        order_line_table = self.search_by_row_and_key("ORDER_LINE","*","ID_PRODUCT", product_id)
+        
 
         for order in order_line_table:
             quantity = order["QUANTITY"]
-            if product_id == order["ID_PRODUCT"] & order_id == order["ID_ORDER"]:
+            order_product = order["ID_PRODUCT"]
+            order_line_id = order["ID"]
+            order_id_check =  order["ID_ORDER"]
+            if product_id == order_product and order_id == order_id_check:
                 print("ID PRODUCTO Y ID ORDER ENCONTRADOS DENTRO DEL ORDERLINE")
                 print("SUMANDO 1 A LA CANTIDAD")
-                self.create_order_line(product_id, order_id, quantity)
+                data = {"QUANTITY" : quantity + 1}
+                new_line= self.update_product("ORDER_LINE",order_line_id, data)
+                return new_line
             else : 
                 print("ID PRODUCTO NO EXISTE DENTRO DEL ORDERLINE")
                 print("CREANDO  NUEVO ORDERLINE CON PRODUCTO")
-                self.create_order_line(product_id, order_id, quantity)
+                new_line= self.create_order_line(product_id, order_id, quantity)
+                return new_line
         print("No hay ordenes dentro de la orderline, creando una")
-        quantity = order_line_table[0]["QUANTITY"]
-        self.create_order_line(product_id, order_id, quantity)
+        self.create_order_line(product_id, order_id, 0)
 
 
     def create_order_line(self, product_id, order_id, quantity):
@@ -127,15 +135,13 @@ class DataBase():
 
 
         
+        
 
 
 
 db = DataBase()
-
-
-
 def test():
-    order = db.check_and_create_order("UserMigue")
-    db.new_order_line("Queso", order)
+    order = db.check_and_create_order("juan")
+    db.new_order_line(order, "Pera")
 
 test()
