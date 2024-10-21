@@ -43,34 +43,46 @@ class User():
             print(hash.hexdigest())
 
   
-    def check_pw(self, pswrd):#busca el hash, acorde a la contra, guardado
+    def check_pw(self, pswrd, man_key = None):#busca el hash, acorde a la contra, guardado
         """
         Compara el hash de la contraseña ingresada por el usuario con el hash almacenado en la base de datos.
         """
         hash2 = hashlib.new("SHA256")
         hash2.update(pswrd.encode())
-        input_hash = hash2.hexdigest()
-        print(input_hash)
+        password = hash2.hexdigest()
+        print(password)
         if self.manager_access:
             table = "MANAGER"
+            access : bool = self.check_user_credentials(table, password, man_key)
         else:
             table = "CLIENT"
+            access : bool = self.check_user_credentials(table, password)
+            return access
         
+        
+        
+    def check_user_credentials(self, table, password, man_key = None): #Hacer lo de arriba para la key de manager
         user_info = db.search_username(table, self.username)
         if not user_info:
             print("Usuario no encontrado.")
             return False
-        stored_hash = user_info[0]['PASSWORD']
         
-        if stored_hash == input_hash:# Comparar ambos hashes
-            print("Contraseña correcta.")
-            return True
-        else:
-            print("Contraseña incorrecta.")
-            return False
-        
-    def check_access_key(self): #Hacer lo de arriba para la key de manager
-        pass
+        stored_pswrd = user_info[0]['PASSWORD']
+        stored_man_key = user_info[0]["ACCESS_KEY"]
+        if man_key is not None:
+            if stored_pswrd == password and man_key == stored_man_key:# Comparar ambos hashes
+                print("Credenciales correctas.")
+                return True
+            else:
+                print("Credenciales incorrectas.")
+                return False
+        else: 
+            if stored_pswrd == password:# Comparar ambos hashes
+                print("Credenciales correctas.")
+                return True
+            else:
+                print("Credenciales incorrectas.")
+                return False
     
 class Client(User):
     def __init__(self, name , money, username, password, mail, image):
