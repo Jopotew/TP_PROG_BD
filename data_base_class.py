@@ -132,11 +132,30 @@ class DataBase():
             }
         new_line = self.insert_product("ORDER_LINE", new_order_line_data)
         return new_line
-        
+    
+    def remove_order_line(self, order, product):#FALTA TESTEAR
+        order_id = order["ID"]
+        product_table= self.search_by_row_and_key("PRODUCT","*","NAME",product)
+        product_id = product_table[0]["ID"]
+        order_line_table = self.search_by_row_and_key("ORDER_LINE","*","ID_PRODUCT", product_id)
 
-
-        
-        
+        for order in order_line_table:
+            quantity = order["QUANTITY"]
+            order_product = order["ID_PRODUCT"]
+            order_line_id = order["ID"]
+            order_id_check =  order["ID_ORDER"]
+            if product_id == order_product and order_id == order_id_check:
+                if quantity > 1:
+                    data = {"QUANTITY" : quantity - 1}
+                    new_line= self.update_product("ORDER_LINE",order_line_id, data)
+                    return new_line
+                elif quantity <= 1:
+                    response = self.delete_table("ORDER_LINE", order_line_id)
+                    return response
+    
+    def create_items(self):
+        item_data = self.search_by_row("PRODUCT", "*")
+        return item_data    
 
 
 
