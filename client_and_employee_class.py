@@ -4,7 +4,7 @@ import hashlib
 from data_base_class import DataBase
 
 
-db = DataBase()
+
 
 
 class User():
@@ -23,7 +23,8 @@ class User():
     def get_username(self):
         return self.username
     
-    def create_user_hash(self): #crea el hash y lo guarda en bd
+    def create_user_hash(self):
+        db = DataBase()#crea el hash y lo guarda en bd
         """
         CUANDO SE CREA EL USER, CREA UN HASH DE TODO LO NECESARIO Y LO GUARDA
         EN LA BASE DE DATOS DIRECTO.
@@ -62,6 +63,7 @@ class User():
         
         
     def check_user_credentials(self, table, password, man_key = None): #Hacer lo de arriba para la key de manager
+        db = DataBase()
         user_info = db.search_username(table, self.username)
         if not user_info:
             print("Usuario no encontrado.")
@@ -83,6 +85,7 @@ class User():
             else:
                 print("Credenciales incorrectas.")
                 return False
+            
     
 class Client(User):
     def __init__(self, name , money, username, password, mail, image):
