@@ -1,6 +1,4 @@
-import urllib.request
-from PIL import Image, ImageTk
-from io import BytesIO
+
 from supabase import create_client, Client
 from tkinter import END, messagebox
 
