@@ -157,9 +157,9 @@ class DataBase():
 
 
 
-db = DataBase()
+"""db = DataBase()
 def test():
     order = db.check_and_create_order("juan")
     db.new_order_line(order, "Pera")
 
-test()
+test()"""
